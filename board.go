@@ -12,9 +12,14 @@ type Position struct {
 	Col int
 }
 
+func (p Position) LessThan(p1 Position) bool {
+	return p.Row < p1.Row || (p.Row == p1.Row && p.Col < p1.Col)
+}
+
 type Board struct {
-	Size      int
-	Positions []Position
+	Size          int
+	Positions     []Position
+	nearnessCache float64
 }
 
 func NewBoard(size int) *Board {
@@ -34,15 +39,46 @@ func (b *Board) Copy() *Board {
 	res := &Board{
 		Size:      b.Size,
 		Positions: make([]Position, b.Size*b.Size),
+
+		nearnessCache: b.nearnessCache,
 	}
 	copy(res.Positions, b.Positions)
 	return res
 }
 
 func (b *Board) Mutate() {
-	i1 := rand.Intn(len(b.Positions))
-	i2 := rand.Intn(len(b.Positions))
-	b.Positions[i1], b.Positions[i2] = b.Positions[i2], b.Positions[i1]
+	p1 := b.randomPos()
+	p2 := b.randomPos()
+	v1 := b.At(p1.Row, p1.Col)
+	v2 := b.At(p2.Row, p2.Col)
+
+	updateCache := func(sign float64) {
+		if b.nearnessCache == 0 {
+			return
+		}
+		vs := []Position{*v1, *v2}
+		for pointIdx, p := range []Position{p1, p2} {
+			v := vs[pointIdx]
+			for i := 0; i < b.Size; i++ {
+				for j := 0; j < b.Size; j++ {
+					p1 := Position{Row: i, Col: j}
+					v1 := *b.At(i, j)
+					b.nearnessCache += sign * b.Distance(p, p1) * b.Distance(v, v1)
+				}
+			}
+		}
+	}
+
+	updateCache(-1)
+	*v1, *v2 = *v2, *v1
+	updateCache(1)
+}
+
+func (b *Board) randomPos() Position {
+	return Position{
+		Row: rand.Intn(b.Size),
+		Col: rand.Intn(b.Size),
+	}
 }
 
 func (b *Board) Shuffle() *Board {
@@ -72,6 +108,9 @@ func (b *Board) coordDistance(x1, x2 int) float64 {
 }
 
 func (b *Board) Nearness() float64 {
+	if b.nearnessCache != 0 {
+		return b.nearnessCache
+	}
 	var res float64
 	for i := 0; i < b.Size; i++ {
 		for j := 0; j < b.Size; j++ {
@@ -81,11 +120,14 @@ func (b *Board) Nearness() float64 {
 				for l := 0; l < b.Size; l++ {
 					a2 := *b.At(k, l)
 					b2 := Position{Row: k, Col: l}
-					res += b.Distance(a1, a2) * b.Distance(b1, b2)
+					if b1.LessThan(b2) {
+						res += b.Distance(a1, a2) * b.Distance(b1, b2)
+					}
 				}
 			}
 		}
 	}
+	b.nearnessCache = res
 	return res
 }
 
