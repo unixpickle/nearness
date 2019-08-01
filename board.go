@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"math/rand"
 
 	"github.com/unixpickle/essentials"
 )
@@ -29,6 +30,21 @@ func NewBoard(size int) *Board {
 	return b
 }
 
+func (b *Board) Copy() *Board {
+	res := &Board{
+		Size:      b.Size,
+		Positions: make([]Position, b.Size*b.Size),
+	}
+	copy(res.Positions, b.Positions)
+	return res
+}
+
+func (b *Board) Mutate() {
+	i1 := rand.Intn(len(b.Positions))
+	i2 := rand.Intn(len(b.Positions))
+	b.Positions[i1], b.Positions[i2] = b.Positions[i2], b.Positions[i1]
+}
+
 func (b *Board) At(i, j int) *Position {
 	return &b.Positions[i*b.Size+j]
 }
@@ -51,7 +67,7 @@ func (b *Board) Nearness() float64 {
 			b1 := Position{Row: i, Col: j}
 			for k := 0; k < b.Size; k++ {
 				for l := 0; l < b.Size; l++ {
-					a2 := *b.At(i, j)
+					a2 := *b.At(k, l)
 					b2 := Position{Row: k, Col: l}
 					res += b.Distance(a1, a2) * b.Distance(b1, b2)
 				}
