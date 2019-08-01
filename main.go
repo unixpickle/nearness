@@ -10,7 +10,7 @@ func main() {
 		b1 := board.Copy()
 		b1.Mutate()
 		l2 := b1.NormNearness()
-		if l2 < l1 || true {
+		if l2 < l1 {
 			board = b1
 		}
 	}
