@@ -45,6 +45,18 @@ func (b *Board) Mutate() {
 	b.Positions[i1], b.Positions[i2] = b.Positions[i2], b.Positions[i1]
 }
 
+func (b *Board) Shuffle() *Board {
+	perm := rand.Perm(len(b.Positions))
+	res := &Board{
+		Size:      b.Size,
+		Positions: make([]Position, b.Size*b.Size),
+	}
+	for i, j := range perm {
+		res.Positions[i] = b.Positions[j]
+	}
+	return res
+}
+
 func (b *Board) At(i, j int) *Position {
 	return &b.Positions[i*b.Size+j]
 }
