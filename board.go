@@ -3,6 +3,7 @@ package main
 import (
 	"math"
 	"math/rand"
+	"strings"
 
 	"github.com/unixpickle/essentials"
 )
@@ -14,6 +15,18 @@ type Position struct {
 
 func (p Position) LessThan(p1 Position) bool {
 	return p.Row < p1.Row || (p.Row == p1.Row && p.Col < p1.Col)
+}
+
+func (p Position) String() string {
+	return idxString(p.Col) + idxString(p.Row)
+}
+
+func idxString(idx int) string {
+	if idx < 26 {
+		return string('A' + rune(idx))
+	} else {
+		return string('1' + rune(idx-26))
+	}
 }
 
 type Board struct {
@@ -165,4 +178,16 @@ func (b *Board) NormNearness() float64 {
 		30: 5643997650,
 	}
 	return b.Nearness() - table[b.Size]
+}
+
+func (b *Board) String() string {
+	rows := make([]string, 0, b.Size)
+	for i := 0; i < b.Size; i++ {
+		cols := make([]string, 0, b.Size)
+		for j := 0; j < b.Size; j++ {
+			cols = append(cols, b.At(i, j).String())
+		}
+		rows = append(rows, "("+strings.Join(cols, ", ")+")")
+	}
+	return strings.Join(rows, ",\n")
 }
