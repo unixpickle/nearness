@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-const NumImprovers = 2
+const NumImprovers = 4
 
 func main() {
 	solutions := map[int]*Improver{}

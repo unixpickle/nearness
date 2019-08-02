@@ -2,6 +2,11 @@ package main
 
 import "math/rand"
 
+const (
+	MutationFrac = 0.03
+	ImproveSteps = 1000
+)
+
 type Improver struct {
 	Boards []*Board
 }
@@ -15,19 +20,20 @@ func NewImprover(b *Board, numBoards int) *Improver {
 }
 
 func (i *Improver) Step() {
-	worstBoard := i.Boards[0]
-	worstLoss := i.Boards[0].Nearness()
 	for _, b := range i.Boards {
 		improveBoard(b)
-		if b.Nearness() > worstLoss {
-			worstBoard = b
-			worstLoss = b.Nearness()
-		}
 	}
-	if rand.Intn(10) == 0 {
-		worstBoard.CopyFrom(i.BestBoard())
-		for i := 0; i < rand.Intn(50); i++ {
-			worstBoard.Mutate()
+	if rand.Float64() < MutationFrac {
+		best := i.BestBoard()
+		for {
+			idx := rand.Intn(len(i.Boards))
+			if i.Boards[idx] != best {
+				i.Boards[idx].CopyFrom(best)
+				for j := 0; j < rand.Intn(best.Size*best.Size/10); j++ {
+					i.Boards[idx].Mutate()
+				}
+				break
+			}
 		}
 	}
 }
@@ -46,7 +52,7 @@ func (i *Improver) BestBoard() *Board {
 
 func improveBoard(b *Board) {
 	b1 := b.Copy()
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < ImproveSteps; i++ {
 		for i := 0; i < 1+rand.Intn(3); i++ {
 			b1.Mutate()
 		}
