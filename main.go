@@ -22,23 +22,40 @@ func main() {
 			solutions[b.Size] = b
 		}
 	}
-	for step := 0; step < 10000000; step++ {
-		for size, b := range solutions {
-			b1 := b.Copy()
-			for i := 0; i < 1+rand.Intn(3); i++ {
-				b1.Mutate()
-			}
-			if b1.Nearness() < b.Nearness() {
-				solutions[size] = b1
-			}
+	for step := 0; step < 10000; step++ {
+		for _, b := range solutions {
+			go ImproveSolution(b)
 		}
-		if step%1000 == 0 {
-			log.Printf("loss30=%f loss6=%f", solutions[30].NormNearness(),
-				solutions[6].NormNearness())
-		}
-		if step%10000 == 0 {
+		log.Printf("loss30=%f loss6=%f", solutions[30].NormNearness(), solutions[6].NormNearness())
+		if step%10 == 0 {
 			log.Println("saving solution set")
 			SaveSolutions(solutions)
+		}
+	}
+}
+
+func ImproveSolution(b *Board) {
+	origLoss := b.Nearness()
+	b1 := b.Copy()
+	for i := 0; i < 1000; i++ {
+		for i := 0; i < 1+rand.Intn(3); i++ {
+			b1.Mutate()
+		}
+		if b1.Nearness() < b.Nearness() {
+			*b = *b1
+		} else {
+			*b1 = *b
+		}
+	}
+	if b.Nearness() == origLoss {
+		// Let's try to push ourselves out of this global
+		// minimum.
+		for i := 0; i < 30; i++ {
+			b1.Mutate()
+		}
+		ImproveSolution(b1)
+		if b1.Nearness() < origLoss {
+			*b = *b1
 		}
 	}
 }
