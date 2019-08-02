@@ -59,6 +59,12 @@ func (b *Board) Copy() *Board {
 	return res
 }
 
+func (b *Board) CopyFrom(b1 *Board) {
+	b.Size = b1.Size
+	b.nearnessCache = b1.nearnessCache
+	copy(b.Positions, b1.Positions)
+}
+
 func (b *Board) Mutate() {
 	p1 := b.randomPos()
 	p2 := b.randomPos()
