@@ -1,7 +1,6 @@
 package main
 
 import (
-	"math"
 	"math/rand"
 	"strings"
 
@@ -32,7 +31,7 @@ func idxString(idx int) string {
 type Board struct {
 	Size          int
 	Positions     []Position
-	nearnessCache float64
+	nearnessCache int
 }
 
 func NewBoard(size int) *Board {
@@ -71,7 +70,7 @@ func (b *Board) Mutate() {
 	v1 := b.At(p1.Row, p1.Col)
 	v2 := b.At(p2.Row, p2.Col)
 
-	updateCache := func(sign float64) {
+	updateCache := func(sign int) {
 		if b.nearnessCache == 0 {
 			return
 		}
@@ -116,21 +115,22 @@ func (b *Board) At(i, j int) *Position {
 	return &b.Positions[i*b.Size+j]
 }
 
-func (b *Board) Distance(p1, p2 Position) float64 {
-	return math.Pow(b.coordDistance(p1.Col, p2.Col), 2) +
-		math.Pow(b.coordDistance(p1.Row, p2.Row), 2)
+func (b *Board) Distance(p1, p2 Position) int {
+	d1 := b.coordDistance(p1.Col, p2.Col)
+	d2 := b.coordDistance(p1.Row, p2.Row)
+	return d1*d1 + d2*d2
 }
 
-func (b *Board) coordDistance(x1, x2 int) float64 {
+func (b *Board) coordDistance(x1, x2 int) int {
 	d1 := essentials.AbsInt(x1 - x2)
-	return float64(essentials.MinInt(d1, b.Size-d1))
+	return essentials.MinInt(d1, b.Size-d1)
 }
 
-func (b *Board) Nearness() float64 {
+func (b *Board) Nearness() int {
 	if b.nearnessCache != 0 {
 		return b.nearnessCache
 	}
-	var res float64
+	var res int
 	for i := 0; i < b.Size; i++ {
 		for j := 0; j < b.Size; j++ {
 			a1 := *b.At(i, j)
@@ -150,8 +150,8 @@ func (b *Board) Nearness() float64 {
 	return res
 }
 
-func (b *Board) NormNearness() float64 {
-	table := map[int]float64{
+func (b *Board) NormNearness() int {
+	table := map[int]int{
 		1:  0,
 		2:  10,
 		3:  72,

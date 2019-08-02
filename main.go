@@ -34,7 +34,7 @@ func main() {
 			}(imp)
 		}
 		wg.Wait()
-		log.Printf("loss30=%f loss6=%f", solutions[30].BestBoard().NormNearness(),
+		log.Printf("loss30=%d loss6=%d", solutions[30].BestBoard().NormNearness(),
 			solutions[6].BestBoard().NormNearness())
 		if step%10 == 0 {
 			log.Println("saving solution set")
