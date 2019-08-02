@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"strings"
 )
 
@@ -14,7 +15,9 @@ func main() {
 	for step := 0; step < 10000000; step++ {
 		for size, b := range solutions {
 			b1 := b.Copy()
-			b1.Mutate()
+			for i := 0; i < 1+rand.Intn(3); i++ {
+				b1.Mutate()
+			}
 			if b1.Nearness() < b.Nearness() {
 				solutions[size] = b1
 			}
