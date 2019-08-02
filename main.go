@@ -22,6 +22,9 @@ func main() {
 				solutions[size] = b1
 			}
 		}
+		if step%1000 == 0 {
+			log.Printf("loss=%f", solutions[30].NormNearness())
+		}
 		if step%10000 == 0 {
 			log.Println("saving solution set")
 			SaveSolutions(solutions)
