@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"strings"
+	"sync"
 )
 
 func main() {
@@ -23,9 +24,15 @@ func main() {
 		}
 	}
 	for step := 0; step < 10000; step++ {
+		var wg sync.WaitGroup
 		for _, b := range solutions {
-			go ImproveSolution(b)
+			wg.Add(1)
+			go func(b *Board) {
+				defer wg.Done()
+				ImproveSolution(b)
+			}(b)
 		}
+		wg.Wait()
 		log.Printf("loss30=%f loss6=%f", solutions[30].NormNearness(), solutions[6].NormNearness())
 		if step%10 == 0 {
 			log.Println("saving solution set")
