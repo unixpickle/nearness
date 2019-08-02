@@ -123,7 +123,12 @@ func (b *Board) Distance(p1, p2 Position) int {
 
 func (b *Board) coordDistance(x1, x2 int) int {
 	d1 := essentials.AbsInt(x1 - x2)
-	return essentials.MinInt(d1, b.Size-d1)
+	d2 := b.Size - d1
+	if d2 < d1 {
+		return d2
+	} else {
+		return d1
+	}
 }
 
 func (b *Board) Nearness() int {
