@@ -12,6 +12,16 @@ func main() {
 	for i := 6; i <= 30; i++ {
 		solutions[i] = NewBoard(i).Shuffle()
 	}
+	if data, err := ioutil.ReadFile("solutions.txt"); err == nil {
+		boards, err := ParseBoards(string(data))
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("using saved boards...")
+		for _, b := range boards {
+			solutions[b.Size] = b
+		}
+	}
 	for step := 0; step < 10000000; step++ {
 		for size, b := range solutions {
 			b1 := b.Copy()
