@@ -24,7 +24,7 @@ func main() {
 			solutions[b.Size] = NewImprover(b, NumImprovers)
 		}
 	}
-	for step := 0; step < 10000; step++ {
+	for step := 0; true; step++ {
 		var wg sync.WaitGroup
 		for _, imp := range solutions {
 			wg.Add(1)
