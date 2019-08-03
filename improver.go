@@ -51,15 +51,15 @@ func improveBoard(b *Board) bool {
 	improved := false
 	b1 := b.Copy()
 	for i := 0; i < ImproveSteps; i++ {
-		for i := 0; i < 1+rand.Intn(3); i++ {
+		for j := 0; j < 1+rand.Intn(3); j++ {
 			b1.Mutate()
+			if b1.Nearness() < b.Nearness() {
+				improved = true
+				b.CopyFrom(b1)
+				break
+			}
 		}
-		if b1.Nearness() < b.Nearness() {
-			improved = true
-			b.CopyFrom(b1)
-		} else {
-			b1.CopyFrom(b)
-		}
+		b1.CopyFrom(b)
 	}
 	return improved
 }
