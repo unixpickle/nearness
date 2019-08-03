@@ -1,10 +1,10 @@
 package main
 
+import "math"
 import "math/rand"
 
 const (
-	MutationFrac = 0.03
-	ImproveSteps = 1000
+	ImproveSteps = 20000
 )
 
 type Improver struct {
@@ -15,25 +15,22 @@ func NewImprover(b *Board, numBoards int) *Improver {
 	res := &Improver{Boards: make([]*Board, numBoards)}
 	for i := range res.Boards {
 		res.Boards[i] = b.Copy()
+		if i != 0 {
+			res.Boards[i].Mutate()
+		}
 	}
 	return res
 }
 
 func (i *Improver) Step() {
 	for _, b := range i.Boards {
-		improveBoard(b)
-	}
-	if rand.Float64() < MutationFrac {
-		best := i.BestBoard()
-		for {
-			idx := rand.Intn(len(i.Boards))
-			if i.Boards[idx] != best {
-				i.Boards[idx].CopyFrom(best)
-				for j := 0; j < rand.Intn(best.Size*best.Size/10); j++ {
-					i.Boards[idx].Mutate()
-				}
-				break
+		if !improveBoard(b) && b != i.BestBoard() {
+			b.CopyFrom(i.BestBoard())
+			num := int(math.Exp(rand.Float64() * math.Log(float64(b.Size*b.Size)/10)))
+			for j := 0; j < num; j++ {
+				b.Mutate()
 			}
+			break
 		}
 	}
 }
@@ -50,16 +47,19 @@ func (i *Improver) BestBoard() *Board {
 	return bestBoard
 }
 
-func improveBoard(b *Board) {
+func improveBoard(b *Board) bool {
+	improved := false
 	b1 := b.Copy()
 	for i := 0; i < ImproveSteps; i++ {
 		for i := 0; i < 1+rand.Intn(3); i++ {
 			b1.Mutate()
 		}
 		if b1.Nearness() < b.Nearness() {
+			improved = true
 			b.CopyFrom(b1)
 		} else {
 			b1.CopyFrom(b)
 		}
 	}
+	return improved
 }
