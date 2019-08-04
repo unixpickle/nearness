@@ -4,7 +4,7 @@ import "math"
 import "math/rand"
 
 const (
-	ImproveSteps = 20000
+	ImproveSteps = 200000
 )
 
 type Improver struct {
@@ -51,7 +51,7 @@ func improveBoard(b *Board) bool {
 	improved := false
 	b1 := b.Copy()
 	for i := 0; i < ImproveSteps; i++ {
-		for j := 0; j < 1+rand.Intn(3); j++ {
+		for j := 0; j < 1+rand.Intn(10); j++ {
 			b1.Mutate()
 			if b1.Nearness() < b.Nearness() {
 				improved = true
