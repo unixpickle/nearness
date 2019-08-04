@@ -5,6 +5,8 @@ import (
 	"log"
 	"strings"
 	"sync"
+
+	"github.com/unixpickle/essentials"
 )
 
 const NumImprovers = 16
@@ -34,8 +36,8 @@ func main() {
 			}(imp)
 		}
 		wg.Wait()
-		log.Printf("loss30=%d loss6=%d", solutions[30].BestBoard().NormNearness(),
-			solutions[6].BestBoard().NormNearness())
+		log.Printf("loss30=%d score=%f", solutions[30].BestBoard().NormNearness(),
+			NormalizedScore(solutions))
 		if step%10 == 0 {
 			log.Println("saving solution set")
 			SaveSolutions(solutions)
@@ -50,4 +52,14 @@ func SaveSolutions(solutions map[int]*Improver) {
 	}
 	data := []byte(strings.Join(strs, ";\n"))
 	ioutil.WriteFile("solutions.txt", data, 0755)
+}
+
+func NormalizedScore(solutions map[int]*Improver) float64 {
+	rawScores, err := BestRawScores()
+	essentials.Must(err)
+	var sum float64
+	for size, improver := range solutions {
+		sum += float64(rawScores[size]) / float64(improver.BestBoard().NormNearness())
+	}
+	return sum
 }
