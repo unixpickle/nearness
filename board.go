@@ -60,6 +60,12 @@ func (b *Board) CopyFrom(b1 *Board) {
 	copy(b.Positions, b1.Positions)
 }
 
+func (b *Board) Swap(p1, p2 Position) {
+	v1 := b.At(p1.Row, p1.Col)
+	v2 := b.At(p2.Row, p2.Col)
+	*v1, *v2 = *v2, *v1
+}
+
 func (b *Board) RandomSwap() {
 	i1 := rand.Intn(len(b.Positions))
 	i2 := rand.Intn(len(b.Positions))
