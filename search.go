@@ -18,7 +18,7 @@ func SearchSwap(b *Board) *Board {
 		}
 	}
 
-	swaps := &topN{N: 1000}
+	swaps := &topN{N: 5000}
 	for i := 0; i < b.Size; i++ {
 		for j := 0; j < b.Size; j++ {
 			p1 := Position{Row: i, Col: j}

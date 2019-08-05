@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"math/rand"
 	"strings"
 
@@ -70,6 +71,13 @@ func (b *Board) RandomSwap() {
 	i1 := rand.Intn(len(b.Positions))
 	i2 := rand.Intn(len(b.Positions))
 	b.Positions[i1], b.Positions[i2] = b.Positions[i2], b.Positions[i1]
+}
+
+func (b *Board) Mutate() {
+	num := int(math.Exp(rand.Float64() * math.Log(float64(b.Size*b.Size)/10)))
+	for j := 0; j < num; j++ {
+		b.RandomSwap()
+	}
 }
 
 func (b *Board) Shuffle() *Board {

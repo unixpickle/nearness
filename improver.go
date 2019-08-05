@@ -1,8 +1,5 @@
 package main
 
-import "math"
-import "math/rand"
-
 const (
 	ImproveSteps = 200000
 )
@@ -16,7 +13,7 @@ func NewImprover(b *Board, numBoards int) *Improver {
 	for i := range res.Boards {
 		res.Boards[i] = b.Copy()
 		if i != 0 {
-			res.Boards[i].RandomSwap()
+			res.Boards[i].Mutate()
 		}
 	}
 	return res
@@ -26,11 +23,7 @@ func (i *Improver) Step() {
 	for _, b := range i.Boards {
 		if !improveBoard(b) && b != i.BestBoard() {
 			b.CopyFrom(i.BestBoard())
-			num := int(math.Exp(rand.Float64() * math.Log(float64(b.Size*b.Size)/10)))
-			for j := 0; j < num; j++ {
-				b.RandomSwap()
-			}
-			break
+			b.Mutate()
 		}
 	}
 }
