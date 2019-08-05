@@ -49,8 +49,8 @@ func SearchSwap(b *Board) *Board {
 
 	if bestDelta < 0 {
 		b1 := b.Copy()
-		v1 := b.At(bestPos1.Row, bestPos1.Col)
-		v2 := b.At(bestPos2.Row, bestPos2.Col)
+		v1 := b1.At(bestPos1.Row, bestPos1.Col)
+		v2 := b1.At(bestPos2.Row, bestPos2.Col)
 		*v1, *v2 = *v2, *v1
 		return b1
 	}
