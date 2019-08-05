@@ -16,7 +16,7 @@ func NewImprover(b *Board, numBoards int) *Improver {
 	for i := range res.Boards {
 		res.Boards[i] = b.Copy()
 		if i != 0 {
-			res.Boards[i].Mutate()
+			res.Boards[i].RandomSwap()
 		}
 	}
 	return res
@@ -28,7 +28,7 @@ func (i *Improver) Step() {
 			b.CopyFrom(i.BestBoard())
 			num := int(math.Exp(rand.Float64() * math.Log(float64(b.Size*b.Size)/10)))
 			for j := 0; j < num; j++ {
-				b.Mutate()
+				b.RandomSwap()
 			}
 			break
 		}
@@ -48,18 +48,10 @@ func (i *Improver) BestBoard() *Board {
 }
 
 func improveBoard(b *Board) bool {
-	improved := false
-	b1 := b.Copy()
-	for i := 0; i < ImproveSteps; i++ {
-		for j := 0; j < 1+rand.Intn(10); j++ {
-			b1.Mutate()
-			if b1.Nearness() < b.Nearness() {
-				improved = true
-				b.CopyFrom(b1)
-				break
-			}
-		}
-		b1.CopyFrom(b)
+	b1 := SearchSwap(b)
+	if b1 != nil {
+		b.CopyFrom(b1)
+		return true
 	}
-	return improved
+	return false
 }
