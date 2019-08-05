@@ -28,7 +28,7 @@ func SearchSwap(b *Board) *Board {
 					continue
 				}
 				delta := -(contrib1 + contrib2)
-				if delta < bestDelta {
+				if delta > bestDelta {
 					// It's impossible for this to be a bigger
 					// improvement at this point.
 					continue
