@@ -66,7 +66,19 @@ func (b *Board) CopyFrom(b1 *Board) {
 
 func (b *Board) Mutate() {
 	p1 := b.randomPos()
-	p2 := b.randomPos()
+	p2 := p1
+	p2.Row += rand.Intn(3) - 1
+	if p2.Row < 0 {
+		p2.Row += b.Size
+	} else if p2.Row == b.Size {
+		p2.Row = 0
+	}
+	p2.Col += rand.Intn(3) - 1
+	if p2.Col < 0 {
+		p2.Col += b.Size
+	} else if p2.Col == b.Size {
+		p2.Col = 0
+	}
 	v1 := b.At(p1.Row, p1.Col)
 	v2 := b.At(p2.Row, p2.Col)
 

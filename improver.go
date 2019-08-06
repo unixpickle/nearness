@@ -4,7 +4,7 @@ import "math"
 import "math/rand"
 
 const (
-	ImproveSteps = 200000
+	ImproveSteps = 20000
 )
 
 type Improver struct {
