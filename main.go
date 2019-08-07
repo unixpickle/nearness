@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
-	"sync"
 
 	"github.com/unixpickle/essentials"
 )
@@ -27,15 +26,9 @@ func main() {
 		}
 	}
 	for step := 0; true; step++ {
-		var wg sync.WaitGroup
 		for _, imp := range solutions {
-			wg.Add(1)
-			go func(imp *Improver) {
-				defer wg.Done()
-				imp.Step()
-			}(imp)
+			imp.Step()
 		}
-		wg.Wait()
 		log.Printf("loss30=%d score=%f", solutions[30].BestBoard().NormNearness(),
 			NormalizedScore(solutions))
 		SaveSolutions(solutions)

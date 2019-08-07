@@ -1,7 +1,10 @@
 package main
 
-import "math"
-import "math/rand"
+import (
+	"math"
+	"math/rand"
+	"sync"
+)
 
 const (
 	ImproveSteps = 200000
@@ -23,14 +26,26 @@ func NewImprover(b *Board, numBoards int) *Improver {
 }
 
 func (i *Improver) Step() {
-	for _, b := range i.Boards {
-		if !improveBoard(b) && b != i.BestBoard() {
-			b.CopyFrom(i.BestBoard())
-			num := int(math.Exp(rand.Float64() * math.Log(float64(b.Size*b.Size)/10)))
-			for j := 0; j < num; j++ {
-				b.Mutate()
-			}
-			break
+	improved := make([]bool, len(i.Boards))
+
+	var wg sync.WaitGroup
+	for j, b := range i.Boards {
+		wg.Add(1)
+		go func(b *Board, j int) {
+			defer wg.Done()
+			improved[j] = improveBoard(b)
+		}(b, j)
+	}
+	wg.Wait()
+
+	for j, b := range i.Boards {
+		if improved[j] || b == i.BestBoard() {
+			continue
+		}
+		b.CopyFrom(i.BestBoard())
+		num := int(math.Exp(rand.Float64() * math.Log(float64(b.Size*b.Size)/10)))
+		for j := 0; j < num; j++ {
+			b.Mutate()
 		}
 	}
 }
