@@ -9,7 +9,7 @@ import (
 	"github.com/unixpickle/essentials"
 )
 
-const NumImprovers = 16
+const NumImprovers = 64
 
 func main() {
 	solutions := map[int]*Improver{}
@@ -38,10 +38,7 @@ func main() {
 		wg.Wait()
 		log.Printf("loss30=%d score=%f", solutions[30].BestBoard().NormNearness(),
 			NormalizedScore(solutions))
-		if step%10 == 0 {
-			log.Println("saving solution set")
-			SaveSolutions(solutions)
-		}
+		SaveSolutions(solutions)
 	}
 }
 
