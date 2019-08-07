@@ -9,7 +9,7 @@ import (
 	"github.com/unixpickle/essentials"
 )
 
-const NumImprovers = 2
+const NumImprovers = 64
 
 func main() {
 	solutions := map[int]*Improver{}

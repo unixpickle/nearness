@@ -1,5 +1,8 @@
 package main
 
+import "math"
+import "math/rand"
+
 const (
 	ImproveSteps = 200000
 )
@@ -23,7 +26,11 @@ func (i *Improver) Step() {
 	for _, b := range i.Boards {
 		if !improveBoard(b) && b != i.BestBoard() {
 			b.CopyFrom(i.BestBoard())
-			b.Mutate()
+			num := int(math.Exp(rand.Float64() * math.Log(float64(b.Size*b.Size)/10)))
+			for j := 0; j < num; j++ {
+				b.Mutate()
+			}
+			break
 		}
 	}
 }
@@ -41,10 +48,18 @@ func (i *Improver) BestBoard() *Board {
 }
 
 func improveBoard(b *Board) bool {
-	b1 := SearchSwap(b)
-	if b1 != nil {
-		b.CopyFrom(b1)
-		return true
+	improved := false
+	b1 := b.Copy()
+	for i := 0; i < ImproveSteps; i++ {
+		for j := 0; j < 1+rand.Intn(10); j++ {
+			b1.Mutate()
+			if b1.Nearness() < b.Nearness() {
+				improved = true
+				b.CopyFrom(b1)
+				break
+			}
+		}
+		b1.CopyFrom(b)
 	}
-	return false
+	return improved
 }

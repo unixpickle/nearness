@@ -1,7 +1,6 @@
 package main
 
 import (
-	"math"
 	"math/rand"
 	"strings"
 
@@ -30,8 +29,9 @@ func idxString(idx int) string {
 }
 
 type Board struct {
-	Size      int
-	Positions []Position
+	Size          int
+	Positions     []Position
+	nearnessCache int
 }
 
 func NewBoard(size int) *Board {
@@ -51,6 +51,8 @@ func (b *Board) Copy() *Board {
 	res := &Board{
 		Size:      b.Size,
 		Positions: make([]Position, b.Size*b.Size),
+
+		nearnessCache: b.nearnessCache,
 	}
 	copy(res.Positions, b.Positions)
 	return res
@@ -58,25 +60,64 @@ func (b *Board) Copy() *Board {
 
 func (b *Board) CopyFrom(b1 *Board) {
 	b.Size = b1.Size
+	b.nearnessCache = b1.nearnessCache
 	copy(b.Positions, b1.Positions)
+}
+
+func (b *Board) Mutate() {
+	p1 := b.randomPos()
+	var p2 Position
+	if rand.Intn(2) == 0 {
+		p2 = p1
+		p2.Row += rand.Intn(3) - 1
+		if p2.Row < 0 {
+			p2.Row += b.Size
+		} else if p2.Row == b.Size {
+			p2.Row = 0
+		}
+		p2.Col += rand.Intn(3) - 1
+		if p2.Col < 0 {
+			p2.Col += b.Size
+		} else if p2.Col == b.Size {
+			p2.Col = 0
+		}
+	} else {
+		p2 = b.randomPos()
+	}
+
+	b.Swap(p1, p2)
 }
 
 func (b *Board) Swap(p1, p2 Position) {
 	v1 := b.At(p1.Row, p1.Col)
 	v2 := b.At(p2.Row, p2.Col)
+
+	updateCache := func(sign int) {
+		if b.nearnessCache == 0 {
+			return
+		}
+		vs := []Position{*v1, *v2}
+		for pointIdx, p := range []Position{p1, p2} {
+			v := vs[pointIdx]
+			for i := 0; i < b.Size; i++ {
+				for j := 0; j < b.Size; j++ {
+					p1 := Position{Row: i, Col: j}
+					v1 := *b.At(i, j)
+					b.nearnessCache += sign * b.Distance(p, p1) * b.Distance(v, v1)
+				}
+			}
+		}
+	}
+
+	updateCache(-1)
 	*v1, *v2 = *v2, *v1
+	updateCache(1)
 }
 
-func (b *Board) RandomSwap() {
-	i1 := rand.Intn(len(b.Positions))
-	i2 := rand.Intn(len(b.Positions))
-	b.Positions[i1], b.Positions[i2] = b.Positions[i2], b.Positions[i1]
-}
-
-func (b *Board) Mutate() {
-	num := int(math.Exp(rand.Float64() * math.Log(float64(b.Size*b.Size)/10)))
-	for j := 0; j < num; j++ {
-		b.RandomSwap()
+func (b *Board) randomPos() Position {
+	return Position{
+		Row: rand.Intn(b.Size),
+		Col: rand.Intn(b.Size),
 	}
 }
 
@@ -113,6 +154,9 @@ func (b *Board) coordDistance(x1, x2 int) int {
 }
 
 func (b *Board) Nearness() int {
+	if b.nearnessCache != 0 {
+		return b.nearnessCache
+	}
 	var res int
 	for i := 0; i < b.Size; i++ {
 		for j := 0; j < b.Size; j++ {
@@ -129,6 +173,7 @@ func (b *Board) Nearness() int {
 			}
 		}
 	}
+	b.nearnessCache = res
 	return res
 }
 
