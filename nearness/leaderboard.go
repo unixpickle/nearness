@@ -1,6 +1,6 @@
-package main
+package nearness
 
-func BestRawScores() (map[int]int, error) {
+func BestRawScores() map[int]int {
 	// TODO: fetch this from the website http://azspcs.com/Contest/Nearness/BestRawScores.
 	return map[int]int{
 		6:  5526,
@@ -28,5 +28,18 @@ func BestRawScores() (map[int]int, error) {
 		28: 1404896640,
 		29: 1843448171,
 		30: 2439470876,
-	}, nil
+	}
+}
+
+func TotalNormalizedScore(solutions map[int]*Board) float64 {
+	var sum float64
+	for _, b := range solutions {
+		sum += NormalizedScore(b)
+	}
+	return sum
+}
+
+func NormalizedScore(b *Board) float64 {
+	rawScores := BestRawScores()
+	return float64(rawScores[b.Size]) / float64(b.NormNearness())
 }
