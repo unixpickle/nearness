@@ -28,11 +28,15 @@ func main() {
 			solutions[b.Size] = b
 		}
 	}
+	exploiter := NewExploiter(MinSize, MaxSize)
 	for step := 0; true; step++ {
-		for i := MinSize; i <= MaxSize; i++ {
-			solutions[i] = Search(solutions[i], 0)
-		}
-		log.Printf("step %d: score=%f", step, NormalizedScore(solutions))
+		size := exploiter.Sample()
+		oldScore := NormalizedScore(solutions[size])
+		solutions[size] = Search(solutions[size], 0)
+		newScore := NormalizedScore(solutions[size])
+		exploiter.GotUtility(size, newScore-oldScore)
+		log.Printf("step %d: score=%f delta=%f size=%d", step, TotalNormalizedScore(solutions),
+			newScore-oldScore, size)
 		SaveSolutions(solutions)
 	}
 }
@@ -46,12 +50,16 @@ func SaveSolutions(solutions map[int]*Board) {
 	ioutil.WriteFile("solutions.txt", data, 0755)
 }
 
-func NormalizedScore(solutions map[int]*Board) float64 {
-	rawScores, err := BestRawScores()
-	essentials.Must(err)
+func TotalNormalizedScore(solutions map[int]*Board) float64 {
 	var sum float64
-	for size, b := range solutions {
-		sum += float64(rawScores[size]) / float64(b.NormNearness())
+	for _, b := range solutions {
+		sum += NormalizedScore(b)
 	}
 	return sum
+}
+
+func NormalizedScore(b *Board) float64 {
+	rawScores, err := BestRawScores()
+	essentials.Must(err)
+	return float64(rawScores[b.Size]) / float64(b.NormNearness())
 }
