@@ -8,12 +8,15 @@ import (
 	"github.com/unixpickle/essentials"
 )
 
-const NumImprovers = 64
+const (
+	MinSize = 6
+	MaxSize = 30
+)
 
 func main() {
-	solutions := map[int]*Improver{}
-	for i := 6; i <= 30; i++ {
-		solutions[i] = NewImprover(NewBoard(i).Shuffle(), NumImprovers)
+	solutions := map[int]*Board{}
+	for i := MinSize; i <= MaxSize; i++ {
+		solutions[i] = NewBoard(i).Shuffle()
 	}
 	if data, err := ioutil.ReadFile("solutions.txt"); err == nil {
 		boards, err := ParseBoards(string(data))
@@ -22,34 +25,33 @@ func main() {
 		}
 		log.Println("using saved boards...")
 		for _, b := range boards {
-			solutions[b.Size] = NewImprover(b, NumImprovers)
+			solutions[b.Size] = b
 		}
 	}
 	for step := 0; true; step++ {
-		for _, imp := range solutions {
-			imp.Step()
+		for i := MinSize; i <= MaxSize; i++ {
+			solutions[i] = Search(solutions[i], 0)
 		}
-		log.Printf("loss30=%d score=%f", solutions[30].BestBoard().NormNearness(),
-			NormalizedScore(solutions))
+		log.Printf("step %d: score=%f", step, NormalizedScore(solutions))
 		SaveSolutions(solutions)
 	}
 }
 
-func SaveSolutions(solutions map[int]*Improver) {
+func SaveSolutions(solutions map[int]*Board) {
 	strs := make([]string, 0, len(solutions))
-	for _, imp := range solutions {
-		strs = append(strs, imp.BestBoard().String())
+	for i := MinSize; i <= MaxSize; i++ {
+		strs = append(strs, solutions[i].String())
 	}
 	data := []byte(strings.Join(strs, ";\n"))
 	ioutil.WriteFile("solutions.txt", data, 0755)
 }
 
-func NormalizedScore(solutions map[int]*Improver) float64 {
+func NormalizedScore(solutions map[int]*Board) float64 {
 	rawScores, err := BestRawScores()
 	essentials.Must(err)
 	var sum float64
-	for size, improver := range solutions {
-		sum += float64(rawScores[size]) / float64(improver.BestBoard().NormNearness())
+	for size, b := range solutions {
+		sum += float64(rawScores[size]) / float64(b.NormNearness())
 	}
 	return sum
 }
