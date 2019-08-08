@@ -1,7 +1,6 @@
 package main
 
 import (
-	"math/rand"
 	"runtime"
 )
 
@@ -54,7 +53,7 @@ func LocalSearch(b *Board) bool {
 	improved := false
 	b1 := b.Copy()
 	for i := 0; i < LocalSteps; i++ {
-		for j := 0; j < 1+rand.Intn(10); j++ {
+		for j := 0; j < 5; j++ {
 			b1.Mutate()
 			if b1.Nearness() < b.Nearness() {
 				improved = true
