@@ -1,5 +1,7 @@
 package nearness
 
+// BestRawScores gets the best raw scores from the contest
+// leaderboard.
 func BestRawScores() map[int]int {
 	// TODO: fetch this from the website http://azspcs.com/Contest/Nearness/BestRawScores.
 	return map[int]int{
@@ -31,6 +33,8 @@ func BestRawScores() map[int]int {
 	}
 }
 
+// TotalNormalizedScore gets the score that would appear
+// for all the submissions on the leaderboard.
 func TotalNormalizedScore(solutions map[int]*Board) float64 {
 	var sum float64
 	for _, b := range solutions {
@@ -39,6 +43,8 @@ func TotalNormalizedScore(solutions map[int]*Board) float64 {
 	return sum
 }
 
+// NormalizedScore gets the score that would appear for a
+// single board when it is submitted.
 func NormalizedScore(b *Board) float64 {
 	rawScores := BestRawScores()
 	return float64(rawScores[b.Size]) / float64(b.NormNearness())

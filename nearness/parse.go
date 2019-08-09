@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ParseBoards parses a submission to the contest.
 func ParseBoards(s string) ([]*Board, error) {
 	var res []*Board
 	for _, substr := range strings.Split(s, ";") {
@@ -19,6 +20,8 @@ func ParseBoards(s string) ([]*Board, error) {
 	return res, nil
 }
 
+// ParseBoard parses a single board submission to the
+// contest.
 func ParseBoard(s string) (*Board, error) {
 	replacer := strings.NewReplacer("(", "", ")", "", " ", "", "\n", "", ",", " ")
 	s = replacer.Replace(s)

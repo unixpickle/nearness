@@ -7,15 +7,19 @@ import (
 	"github.com/unixpickle/essentials"
 )
 
+// Position specifies a location in a grid.
 type Position struct {
 	Row int
 	Col int
 }
 
+// LessThan defines an ordering between positions.
 func (p Position) LessThan(p1 Position) bool {
 	return p.Row < p1.Row || (p.Row == p1.Row && p.Col < p1.Col)
 }
 
+// String encodes the position in a way compatible with
+// contest submissions.
 func (p Position) String() string {
 	return idxString(p.Col) + idxString(p.Row)
 }
@@ -28,12 +32,14 @@ func idxString(idx int) string {
 	}
 }
 
+// A Board represents a single permuted board.
 type Board struct {
 	Size          int
 	Positions     []Position
 	nearnessCache int
 }
 
+// NewBoard creates an unpermuted board.
 func NewBoard(size int) *Board {
 	b := &Board{
 		Size:      size,
@@ -47,6 +53,7 @@ func NewBoard(size int) *Board {
 	return b
 }
 
+// Copy creates a deep copy of the board.
 func (b *Board) Copy() *Board {
 	res := &Board{
 		Size:      b.Size,
@@ -58,12 +65,14 @@ func (b *Board) Copy() *Board {
 	return res
 }
 
+// CopyFrom sets b to be a deep copy of b1.
 func (b *Board) CopyFrom(b1 *Board) {
 	b.Size = b1.Size
 	b.nearnessCache = b1.nearnessCache
 	copy(b.Positions, b1.Positions)
 }
 
+// Mutate applies a random swap to the board.
 func (b *Board) Mutate() {
 	p1 := b.randomPos()
 	var p2 Position
@@ -88,6 +97,7 @@ func (b *Board) Mutate() {
 	b.Swap(p1, p2)
 }
 
+// Swap swaps the entries at two positions in the board.
 func (b *Board) Swap(p1, p2 Position) {
 	v1 := b.At(p1.Row, p1.Col)
 	v2 := b.At(p2.Row, p2.Col)
@@ -121,6 +131,7 @@ func (b *Board) randomPos() Position {
 	}
 }
 
+// Shuffle totally re-arranges the board.
 func (b *Board) Shuffle() *Board {
 	perm := rand.Perm(len(b.Positions))
 	res := &Board{
@@ -133,10 +144,13 @@ func (b *Board) Shuffle() *Board {
 	return res
 }
 
+// At gets a pointer to the given position on the board.
 func (b *Board) At(i, j int) *Position {
 	return &b.Positions[i*b.Size+j]
 }
 
+// Distance returns the squared distance between two
+// positions on the board.
 func (b *Board) Distance(p1, p2 Position) int {
 	d1 := b.coordDistance(p1.Col, p2.Col)
 	d2 := b.coordDistance(p1.Row, p2.Row)
@@ -153,6 +167,8 @@ func (b *Board) coordDistance(x1, x2 int) int {
 	}
 }
 
+// Nearness computes the nearness loss without subtracting
+// the lower-bound.
 func (b *Board) Nearness() int {
 	if b.nearnessCache != 0 {
 		return b.nearnessCache
@@ -177,6 +193,8 @@ func (b *Board) Nearness() int {
 	return res
 }
 
+// NormNearness computes the nearness with the lower-bound
+// subtracted off.
 func (b *Board) NormNearness() int {
 	table := map[int]int{
 		1:  0,
@@ -213,6 +231,8 @@ func (b *Board) NormNearness() int {
 	return b.Nearness() - table[b.Size]
 }
 
+// String encodes the board in a way suitable for the
+// contest submission system.
 func (b *Board) String() string {
 	rows := make([]string, 0, b.Size)
 	for i := 0; i < b.Size; i++ {
